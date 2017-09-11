@@ -51,6 +51,12 @@ def main():
     for entry in head.object.tree:
         print(entry.id, entry.type, entry.filemode, entry.name)
 
+    index = repo.get_index()
+    with index.staging() as stage:
+        stage.add('test.py')
+        stage.apply_changes()
+    repo.commit_to_branch(repo.master, 'commit test', 'hal1932', 'yu.arai.19@gmail.com')
+
 
 if __name__ == '__main__':
     main()
