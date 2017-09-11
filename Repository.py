@@ -38,6 +38,9 @@ class Repository(object):
         return Repository(obj)
 
     @property
+    def object(self): return self.__obj
+
+    @property
     def directory(self): return self.__obj.workdir
 
     @property

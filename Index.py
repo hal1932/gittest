@@ -27,7 +27,7 @@ class Stage(object):
         for path in paths:
             self.__index_obj.remove(path)
 
-    def commit(self):
+    def apply_changes(self):
         self.__index_obj.write()
         self.__is_commited = True
 
