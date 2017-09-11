@@ -65,17 +65,21 @@ def main():
 
 class RemoteCallbacks(pygit2.RemoteCallbacks):
 
+    def certificate_check(self, certificate, valid, host):
+        print('[certificate_check]', certificate, valid, host)
+        return True
+
     def credentials(self, url, username_from_url, allowed_types):
-        print(url, username_from_url, allowed_types)
-        if allowed_types & pygit2.GIT_CREDTYPE_SSH_KEY != 0:
-            print('ssh_key')
-        elif allowed_types & pygit2.GIT_CREDTYPE_USERPASS_PLAINTEXT != 0:
+        print('[credentials]', url, username_from_url, allowed_types)
+        if allowed_types == pygit2.GIT_CREDTYPE_SSH_KEY:
+            return pygit2.Keypair('git', config.SSH_PUBLIC_KEY, config.SSH_PRIVATE_KEY, '')
+        elif allowed_types == pygit2.GIT_CREDTYPE_USERPASS_PLAINTEXT:
             return pygit2.UserPass(config.USERNAMWE, config.PASSWORD)
         else:
             raise RuntimeError('unsupported authentication type: {}'.format(allowed_types))
 
     def push_update_reference(self, refname, message):
-        print(refname, message)
+        print('[push_update_reference]', refname, message)
 
 
 if __name__ == '__main__':
