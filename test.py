@@ -6,6 +6,7 @@ os.environ['LIBGIT2'] = r'D:\yuta\Desktop\libgit2-0.26.0\release'
 from Repository import *
 import config
 
+# https://github.com/libgit2/pygit2/tree/master/test
 
 def main():
     repo = Repository.from_path(os.getcwd())
@@ -58,10 +59,17 @@ def main():
     repo.commit_to_branch(repo.master, 'commit test', 'hal1932', 'yu.arai.19@gmail.com')
     '''
 
-    master = repo.master
-    remote_origin = repo.object.remotes['origin']
-    remote_origin.push([master.fullname], RemoteCallbacks())
-
+    '''
+    #local = repo.master
+    local = repo.find_or_create_branch('test', checkout=True)
+    index = repo.get_index()
+    with index.staging() as stage:
+        stage.add('test.txt')
+        stage.apply_changes()
+    repo.commit_to_branch(local, 'add test.txt', 'hal1932', 'yu.arai.19@gmail.com')
+    remote = repo.object.remotes['origin']
+    remote.push([local.fullname], RemoteCallbacks())
+    '''
 
 class RemoteCallbacks(pygit2.RemoteCallbacks):
 
@@ -74,7 +82,7 @@ class RemoteCallbacks(pygit2.RemoteCallbacks):
         if allowed_types == pygit2.GIT_CREDTYPE_SSH_KEY:
             return pygit2.Keypair('git', config.SSH_PUBLIC_KEY, config.SSH_PRIVATE_KEY, '')
         elif allowed_types == pygit2.GIT_CREDTYPE_USERPASS_PLAINTEXT:
-            return pygit2.UserPass(config.USERNAMWE, config.PASSWORD)
+            return pygit2.UserPass(config.USERNAME, config.PASSWORD)
         else:
             raise RuntimeError('unsupported authentication type: {}'.format(allowed_types))
 
