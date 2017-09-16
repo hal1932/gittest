@@ -176,8 +176,8 @@ class Repository(object):
 
     def push_to_remote(self, credentials, branch, remote='origin'):
         callbacks = Repository.__RemoteCallbacks(credentials)
-        remote_branch = self.object.remotes[remote]
-        remote_branch.push([branch.fullname], callbacks)
+        remote = self.object.remotes[remote]
+        remote.push([branch.fullname], callbacks)
     # endregion
 
     # region Status
