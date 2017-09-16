@@ -30,7 +30,48 @@ class Status(object):
         return str(self.__dict__)
 
 
+class RemoteCredentials(object):
+
+    def __init__(self):
+        self.username = None
+        self.password = None
+
+        self.id_rsa_pub = None
+        self.id_rsa = None
+
+
 class Repository(object):
+
+    # region class __RemoteCallbacks
+    class __RemoteCallbacks(pygit2.RemoteCallbacks):
+
+        def __init__(self, credentials):
+            self.__username = credentials.username
+            self.__password = credentials.password
+
+            self.__id_rsa_pub = credentials.id_rsa_pub
+            self.__id_rsa = credentials.id_rsa
+
+        '''
+        def certificate_check(self, certificate, valid, host):
+            print('[certificate_check]', certificate, valid, host)
+            return True
+        '''
+
+        def credentials(self, url, username_from_url, allowed_types):
+            # print('[credentials]', url, username_from_url, allowed_types)
+            if allowed_types == pygit2.GIT_CREDTYPE_SSH_KEY:
+                return pygit2.Keypair('git', self.__id_rsa_pub, self.__id_rsa, '')
+            elif allowed_types == pygit2.GIT_CREDTYPE_USERPASS_PLAINTEXT:
+                return pygit2.UserPass(self.__username, self.__password)
+            else:
+                raise RuntimeError('unsupported authentication type: {}'.format(allowed_types))
+
+        '''
+        def push_update_reference(self, refname, message):
+            print('[push_update_reference]', refname, message)
+        '''
+    # endregion
 
     @staticmethod
     def from_path(directory):
@@ -132,6 +173,11 @@ class Repository(object):
 
     def checkout_branch(self, branch):
         self.__obj.checkout(branch.object)
+
+    def push_to_remote(self, credentials, branch, remote='origin'):
+        callbacks = Repository.__RemoteCallbacks(credentials)
+        remote = self.object.remotes[remote]
+        remote.push([branch.fullname], callbacks)
     # endregion
 
     # region Status
@@ -148,6 +194,20 @@ class Repository(object):
         if os.path.isfile(index_file):
             os.remove(index_file)
         self.__obj.reset(self.__head_obj_id(), pygit2.GIT_RESET_MIXED)
+        self.reset(Repository.ROLLBACK_HEAD_INDEX)
+    # endregion
+
+    # region reset
+    RESET_SOFT = pygit2.GIT_RESET_SOFT
+    RESET_MIXED = pygit2.GIT_RESET_MIXED
+    RESET_HARD = pygit2.GIT_RESET_HARD
+
+    ROLLBACK_HEAD = RESET_SOFT
+    ROLLBACK_HEAD_INDEX = RESET_MIXED
+    ROLLBACK_HEAD_INDEX_FILES = RESET_HARD
+
+    def reset(self, option=ROLLBACK_HEAD_INDEX):
+        self.__obj.reset(self.__head_obj_id(), option)
     # endregion
 
     # region private
@@ -175,3 +235,5 @@ class Repository(object):
     def __head_obj_id(self):
         return self.__obj.head.target
     # endregion
+
+
