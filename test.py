@@ -6,6 +6,7 @@ os.environ['LIBGIT2'] = r'D:\yuta\Desktop\libgit2-0.26.0\release'
 from Repository import *
 import config
 
+
 # https://github.com/libgit2/pygit2/tree/master/test
 
 def main():
@@ -46,7 +47,7 @@ def main():
 
     print(repo.directory)
     
-    repo.commit_to_branch(repo.master, 'hoge', 'hal1932', 'yu.arai.19@gmail.com')
+    repo.commit_to_branch(repo.master, 'hoge', config.USERNAME, config.MAIL_ADDRESS)
 
     head = repo.get_head_commit()
     for entry in head.object.tree:
@@ -56,38 +57,22 @@ def main():
     with index.staging() as stage:
         stage.add('test.py')
         stage.apply_changes()
-    repo.commit_to_branch(repo.master, 'commit test', 'hal1932', 'yu.arai.19@gmail.com')
-    '''
+    repo.commit_to_branch(repo.master, 'commit test', config.USERNAME, config.MAIL_ADDRESS)
 
-    '''
     #local = repo.master
     local = repo.find_or_create_branch('test', checkout=True)
     index = repo.get_index()
     with index.staging() as stage:
         stage.add('test.txt')
         stage.apply_changes()
-    repo.commit_to_branch(local, 'add test.txt', 'hal1932', 'yu.arai.19@gmail.com')
-    remote = repo.object.remotes['origin']
-    remote.push([local.fullname], RemoteCallbacks())
+    repo.commit_to_branch(local, 'add test.txt', config.USERNAME, config.MAIL_ADDRESS)
+
+    cred = RemoteCredentials()
+    cred.username = config.USERNAME
+    cred.password = config.PASSWORD
+
+    repo.push_to_remote(cred, local)
     '''
-
-class RemoteCallbacks(pygit2.RemoteCallbacks):
-
-    def certificate_check(self, certificate, valid, host):
-        print('[certificate_check]', certificate, valid, host)
-        return True
-
-    def credentials(self, url, username_from_url, allowed_types):
-        print('[credentials]', url, username_from_url, allowed_types)
-        if allowed_types == pygit2.GIT_CREDTYPE_SSH_KEY:
-            return pygit2.Keypair('git', config.SSH_PUBLIC_KEY, config.SSH_PRIVATE_KEY, '')
-        elif allowed_types == pygit2.GIT_CREDTYPE_USERPASS_PLAINTEXT:
-            return pygit2.UserPass(config.USERNAME, config.PASSWORD)
-        else:
-            raise RuntimeError('unsupported authentication type: {}'.format(allowed_types))
-
-    def push_update_reference(self, refname, message):
-        print('[push_update_reference]', refname, message)
 
 
 if __name__ == '__main__':
