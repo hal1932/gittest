@@ -85,10 +85,8 @@ def main():
     elif result == pygit2.GIT_MERGE_ANALYSIS_FASTFORWARD:
         if do_fastfoward == 0:
             print('be able to do fastforward-marge and to create the merge-commit')
-            print('hoge')
         elif do_fastfoward == 1:
             print('do fastforward-merge')
-            print('hoge')
     elif result == pygit2.GIT_MERGE_ANALYSIS_NORMAL:
         print('aaa')
         pass
@@ -128,6 +126,8 @@ def main():
             print('GIT_MERGE_ANALYSIS_UP_TO_DATE')
         if result & pygit2.GIT_MERGE_ANALYSIS_UNBORN != 0:
             print('GIT_MERGE_ANALYSIS_UNBORN')
+
+    # repo.object.merge(fetch_head.hash)
 
 
 if __name__ == '__main__':
