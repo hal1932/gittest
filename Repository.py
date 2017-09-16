@@ -194,6 +194,20 @@ class Repository(object):
         if os.path.isfile(index_file):
             os.remove(index_file)
         self.__obj.reset(self.__head_obj_id(), pygit2.GIT_RESET_MIXED)
+        self.reset(Repository.ROLLBACK_HEAD_INDEX)
+    # endregion
+
+    # region reset
+    RESET_SOFT = pygit2.GIT_RESET_SOFT
+    RESET_MIXED = pygit2.GIT_RESET_MIXED
+    RESET_HARD = pygit2.GIT_RESET_HARD
+
+    ROLLBACK_HEAD = RESET_SOFT
+    ROLLBACK_HEAD_INDEX = RESET_MIXED
+    ROLLBACK_HEAD_INDEX_FILES = RESET_HARD
+
+    def reset(self, option=ROLLBACK_HEAD_INDEX):
+        self.__obj.reset(self.__head_obj_id(), option)
     # endregion
 
     # region private
