@@ -119,9 +119,9 @@ def main():
         pass
     else:
         if result & pygit2.GIT_MERGE_ANALYSIS_NORMAL != 0:
-            print('GIT_MERGE_ANALYSIS_NORMAL')
+            print('GIT_MERGE_AAA_NALYSIS_NORMAL')
         if result & pygit2.GIT_MERGE_ANALYSIS_FASTFORWARD != 0:
-            print('GIT_MERGE_ANALYSIS_FASTFORWARD')
+            print('GIT_MERGE_FASTFORWARD')
         if result & pygit2.GIT_MERGE_ANALYSIS_UP_TO_DATE != 0:
             print('GIT_MERGE_ANALYSIS_UP_TO_DATE')
         if result & pygit2.GIT_MERGE_ANALYSIS_UNBORN != 0:
