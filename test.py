@@ -43,11 +43,11 @@ def main():
     repo.checkout_branch(test_branch)
     print(test_branch)
 
-    repo.checkout_branch(repo.master)
+    repo.checkout_branch(repo.local_master)
 
     print(repo.directory)
     
-    repo.commit_to_branch(repo.master, 'hoge', config.USERNAME, config.MAIL_ADDRESS)
+    repo.commit_to_branch(repo.local_master, 'hoge', config.USERNAME, config.MAIL_ADDRESS)
 
     head = repo.get_head_commit()
     for entry in head.object.tree:
@@ -57,9 +57,9 @@ def main():
     with index.staging() as stage:
         stage.add('test.py')
         stage.apply_changes()
-    repo.commit_to_branch(repo.master, 'commit test', config.USERNAME, config.MAIL_ADDRESS)
+    repo.commit_to_branch(repo.local_master, 'commit test', config.USERNAME, config.MAIL_ADDRESS)
 
-    #local = repo.master
+    #local = repo.local_master
     local = repo.find_or_create_branch('test', checkout=True)
     index = repo.get_index()
     with index.staging() as stage:
@@ -73,6 +73,21 @@ def main():
 
     repo.push_to_remote(cred, local)
     '''
+
+    r = repo.object
+    remote = r.remotes['origin']
+    remote.fetch()
+    remote_master = r.branches.remote['origin/master']
+    result, do_fastfoward = r.merge_analysis(remote_master.target)
+    if result == pygit2.GIT_MERGE_ANALYSIS_UP_TO_DATE:
+        print('local branch is up to date')
+    elif result == pygit2.GIT_MERGE_ANALYSIS_FASTFORWARD:
+        if do_fastfoward == 0:
+            print('be able to do fastforward-marge and to create the merge-commit')
+        elif do_fastfoward == 1:
+            print('do fastforward-merge')
+    elif result == pygit2.GIT_MERGE_ANALYSIS_NORMAL:
+        pass
 
 
 if __name__ == '__main__':

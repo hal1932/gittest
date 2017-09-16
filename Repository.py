@@ -85,7 +85,10 @@ class Repository(object):
     def directory(self): return self.__obj.workdir
 
     @property
-    def master(self): return self.get_branch('master')
+    def local_master(self): return self.get_local_branch('master')
+
+    @property
+    def remote_origin_master(self): return self.get_remote_branch('origin/master')
 
     def __init__(self, obj):
         self.__obj = obj
