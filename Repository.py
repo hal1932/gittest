@@ -43,9 +43,12 @@ class RemoteCredentials(object):
 class Repository(object):
 
     # region class __RemoteCallbacks
-    class __RemoteCallbacks(pygit2.RemoteCallbacks):
+    class RemoteCallbacks(pygit2.RemoteCallbacks):
 
         def __init__(self, credentials):
+            if credentials is None:
+                return
+
             self.__username = credentials.username
             self.__password = credentials.password
 
@@ -71,6 +74,9 @@ class Repository(object):
         def push_update_reference(self, refname, message):
             print('[push_update_reference]', refname, message)
         '''
+
+        def transfer_progress(self, stats):
+            print('[transfer_progress] {}'.format(stats))
     # endregion
 
     @staticmethod
@@ -94,8 +100,11 @@ class Repository(object):
         self.__obj = obj
 
     # region Commit
-    def get_head_commit(self):
+    def get_head(self):
         return Commit(self.__obj[self.__head_obj_id()])
+
+    def get_fetch_head(self):
+        return self.find_commit_from_name('FETCH_HEAD')
 
     def get_branch_target_commit(self, branch):
         return Commit(self.__obj[branch.target_commit_hash])
@@ -105,6 +114,12 @@ class Repository(object):
 
     def find_commit(self, hash):
         obj = self.__find_obj(hash)
+        if obj is not None:
+            return Commit(obj)
+        return None
+
+    def find_commit_from_name(self, name):
+        obj = self.__obj.revparse_single(name)
         if obj is not None:
             return Commit(obj)
         return None
@@ -178,7 +193,7 @@ class Repository(object):
         self.__obj.checkout(branch.object)
 
     def push_to_remote(self, credentials, branch, remote='origin'):
-        callbacks = Repository.__RemoteCallbacks(credentials)
+        callbacks = Repository.RemoteCallbacks(credentials)
         remote = self.object.remotes[remote]
         remote.push([branch.fullname], callbacks)
     # endregion
@@ -211,6 +226,9 @@ class Repository(object):
 
     def reset(self, option=ROLLBACK_HEAD_INDEX):
         self.__obj.reset(self.__head_obj_id(), option)
+    # endregion
+
+    # region misc
     # endregion
 
     # region private

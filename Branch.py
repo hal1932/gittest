@@ -11,6 +11,9 @@ class Branch(object):
     def fullname(self): return self.__obj.name
 
     @property
+    def remote_name(self): return self.__obj.remote_name
+
+    @property
     def target_commit_hash(self): return self.__obj.target
 
     @property

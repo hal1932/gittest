@@ -13,7 +13,7 @@ def main():
     repo = Repository.from_path(os.getcwd())
 
     '''
-    head = repo.get_head_commit()
+    head = repo.get_head()
     print(head.hash, head.message, head.author)
 
     for commit in repo.enumerate_commits():
@@ -49,7 +49,7 @@ def main():
     
     repo.commit_to_branch(repo.local_master, 'hoge', config.USERNAME, config.MAIL_ADDRESS)
 
-    head = repo.get_head_commit()
+    head = repo.get_head()
     for entry in head.object.tree:
         print(entry.id, entry.type, entry.filemode, entry.name)
 
@@ -74,6 +74,7 @@ def main():
     repo.push_to_remote(cred, local)
     '''
 
+    '''
     r = repo.object
     remote = r.remotes['origin']
     remote.fetch()
@@ -89,6 +90,42 @@ def main():
     elif result == pygit2.GIT_MERGE_ANALYSIS_NORMAL:
         print('aaa')
         pass
+    '''
+
+    '''
+    local_master = repo.local_master
+    remote_master = repo.remote_origin_master
+    remote = repo.object.remotes[remote_master.remote_name]
+    callbacks = Repository.RemoteCallbacks(None)
+    refspec = '+{}:{}'.format(local_master.fullname, remote_master.fullname)
+    print(refspec)
+    progress = remote.fetch([refspec], callbacks=callbacks)
+    print(progress.received_bytes, progress.received_objects)
+    '''
+
+    head = repo.get_head()
+    fetch_head = repo.get_fetch_head()
+    diff = repo.object.diff(head.object, fetch_head.object)
+    print(diff.stats.format(pygit2.GIT_DIFF_STATS_FULL, 256))
+    for patch in diff:
+        print(patch.hunks, patch.line_stats)
+        delta = patch.delta
+        print(delta.status, delta.similarity, delta.is_binary)
+        print(delta.old_file.path, delta.new_file.path)
+
+    result, _ = repo.object.merge_analysis(fetch_head.hash)
+    print(result)
+    if result == pygit2.GIT_MERGE_ANALYSIS_NONE:
+        pass
+    else:
+        if result & pygit2.GIT_MERGE_ANALYSIS_NORMAL != 0:
+            print('GIT_MERGE_ANALYSIS_NORMAL')
+        if result & pygit2.GIT_MERGE_ANALYSIS_FASTFORWARD != 0:
+            print('GIT_MERGE_ANALYSIS_FASTFORWARD')
+        if result & pygit2.GIT_MERGE_ANALYSIS_UP_TO_DATE != 0:
+            print('GIT_MERGE_ANALYSIS_UP_TO_DATE')
+        if result & pygit2.GIT_MERGE_ANALYSIS_UNBORN != 0:
+            print('GIT_MERGE_ANALYSIS_UNBORN')
 
 
 if __name__ == '__main__':
