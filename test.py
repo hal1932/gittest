@@ -85,8 +85,10 @@ def main():
     elif result == pygit2.GIT_MERGE_ANALYSIS_FASTFORWARD:
         if do_fastfoward == 0:
             print('be able to do fastforward-marge and to create the merge-commit')
+            print('hoge')
         elif do_fastfoward == 1:
             print('do fastforward-merge')
+            print('hoge')
     elif result == pygit2.GIT_MERGE_ANALYSIS_NORMAL:
         print('aaa')
         pass
