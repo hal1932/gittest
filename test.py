@@ -87,6 +87,7 @@ def main():
         elif do_fastfoward == 1:
             print('do fastforward-merge')
     elif result == pygit2.GIT_MERGE_ANALYSIS_NORMAL:
+        print('aaa')
         pass
 
 
